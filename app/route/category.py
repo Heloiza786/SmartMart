@@ -52,18 +52,6 @@ def get_category(category_id: int, db: Session = Depends(get_db)):
     return category
 
 
-@router.put("/{category_id}", response_model=CategoryResponse)
-def update_category(category_id: int, category_update: CategoryCreate, db: Session = Depends(get_db)):
-    category = db.query(CategoryModel).filter(CategoryModel.id == category_id).first()
-    if not category:
-        raise HTTPException(status_code=404, detail="Categoria não encontrada")
-    
-    category.name = category_update.name
-    
-    db.commit()
-    db.refresh(category)
-    return category
-
 
 @router.delete("/{category_id}")
 def delete_category(category_id: int, db: Session = Depends(get_db)):
