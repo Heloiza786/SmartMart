@@ -1,14 +1,17 @@
 from fastapi import FastAPI
-from app.database.database import engine
-from app.database import models
-from app.route import sales  # Importe o router
+from app.database.database import engine, Base
+from app.database.models import CategoryModel, ProductModel, SaleModel
+from app.route import sales
+from app.route import category
 
 app = FastAPI(title="SmartMart API")
 
-models.Base.metadata.create_all(bind=engine)
 
-# Registre o router
+Base.metadata.create_all(bind=engine)
+
+
 app.include_router(sales.router)
+app.include_router(category.router)
 
 @app.get("/")
 def root():
