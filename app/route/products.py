@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 from app.database.database import SessionLocal
-from app.database.models import CategoryModel
+from app.database.models import ProductModel
 
-router = APIRouter(prefix="/categories", tags=["categories"])
+router = APIRouter(prefix="/products", tags=["products"])
 
 
 def get_db():
@@ -16,61 +16,60 @@ def get_db():
         db.close()
 
 
-class CategoryCreate(BaseModel):
+class ProductCreate(BaseModel):
     name: str
+    price: float
+    description: Optional[str] = None
+    brand: Optional[str] = None
+    category_id: int
 
-class CategoryResponse(BaseModel):
+class ProductResponse(BaseModel):
     id: int
     name: str
+    price: float
+    description: Optional[str]
+    brand: Optional[str]
+    category_id: int
 
     class Config:
         from_attributes = True
 
 
-@router.post("/", response_model=CategoryResponse, status_code=201)
-def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
-    db_category = CategoryModel(
-        name=category.name
+@router.post("/", response_model=ProductResponse, status_code=201)
+def create_product(product: ProductCreate, db: Session = Depends(get_db)):
+    db_product = ProductModel(
+        name=product.name,
+        price=product.price,
+        description=product.description,
+        brand=product.brand,
+        category_id=product.category_id
     )
-    db.add(db_category)
+    db.add(db_product)
     db.commit()
-    db.refresh(db_category)
-    return db_category
+    db.refresh(db_product)
+    return db_product
 
 
-@router.get("/", response_model=List[CategoryResponse])
-def get_categories(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    categories = db.query(CategoryModel).offset(skip).limit(limit).all()
-    return categories
+@router.get("/", response_model=List[ProductResponse])
+def get_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    products = db.query(ProductModel).offset(skip).limit(limit).all()
+    return products
 
 
-@router.get("/{category_id}", response_model=CategoryResponse)
-def get_category(category_id: int, db: Session = Depends(get_db)):
-    category = db.query(CategoryModel).filter(CategoryModel.id == category_id).first()
-    if not category:
-        raise HTTPException(status_code=404, detail="Categoria não encontrada")
-    return category
+@router.get("/{product_id}", response_model=ProductResponse)
+def get_product(product_id: int, db: Session = Depends(get_db)):
+    product = db.query(ProductModel).filter(ProductModel.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    return product
 
 
-@router.put("/{category_id}", response_model=CategoryResponse)
-def update_category(category_id: int, category_update: CategoryCreate, db: Session = Depends(get_db)):
-    category = db.query(CategoryModel).filter(CategoryModel.id == category_id).first()
-    if not category:
-        raise HTTPException(status_code=404, detail="Categoria não encontrada")
+@router.delete("/{product_id}")
+def delete_product(product_id: int, db: Session = Depends(get_db)):
+    product = db.query(ProductModel).filter(ProductModel.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
     
-    category.name = category_update.name
-    
+    db.delete(product)
     db.commit()
-    db.refresh(category)
-    return category
-
-
-@router.delete("/{category_id}")
-def delete_category(category_id: int, db: Session = Depends(get_db)):
-    category = db.query(CategoryModel).filter(CategoryModel.id == category_id).first()
-    if not category:
-        raise HTTPException(status_code=404, detail="Categoria não encontrada")
-    
-    db.delete(category)
-    db.commit()
-    return {"message": "Categoria deletada com sucesso"}
+    return {"message": "Produto deletado com sucesso"}

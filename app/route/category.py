@@ -53,6 +53,7 @@ def get_category(category_id: int, db: Session = Depends(get_db)):
 
 
 
+
 @router.delete("/{category_id}")
 def delete_category(category_id: int, db: Session = Depends(get_db)):
     category = db.query(CategoryModel).filter(CategoryModel.id == category_id).first()
