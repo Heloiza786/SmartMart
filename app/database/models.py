@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date
 from app.database.database import Base
 
 
@@ -25,6 +25,6 @@ class SaleModel(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     product_id = Column(Integer, ForeignKey("products.id"))
-    month = Column(Integer, nullable=False)
+    sale_date = Column(Date, nullable=False)  
     quantity = Column(Integer, nullable=False)
     total_price = Column(Float, nullable=False)

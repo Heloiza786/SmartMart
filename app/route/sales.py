@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from pydantic import BaseModel
+from datetime import date
 from app.database.database import SessionLocal
 from app.database.models import SaleModel
 
@@ -18,14 +19,14 @@ def get_db():
 # Pydantic schemas
 class SaleCreate(BaseModel):
     product_id: int
-    month: int
+    sale_date: date
     quantity: int
     total_price: float
 
 class SaleResponse(BaseModel):
     id: int
     product_id: int
-    month: int
+    sale_date: date
     quantity: int
     total_price: float
 
@@ -37,7 +38,7 @@ class SaleResponse(BaseModel):
 def create_sale(sale: SaleCreate, db: Session = Depends(get_db)):
     db_sale = SaleModel(
         product_id=sale.product_id,
-        month=sale.month,
+        sale_date=sale.sale_date,
         quantity=sale.quantity,
         total_price=sale.total_price
     )
