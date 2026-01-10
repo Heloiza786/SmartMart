@@ -8,7 +8,7 @@ from app.database.models import SaleModel
 
 router = APIRouter(prefix="/sales", tags=["sales"])
 
-# Dependency
+
 def get_db():
     db = SessionLocal()
     try:
@@ -16,7 +16,7 @@ def get_db():
     finally:
         db.close()
 
-# Pydantic schemas
+
 class SaleCreate(BaseModel):
     product_id: int
     sale_date: date
@@ -33,7 +33,7 @@ class SaleResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# create sale
+
 @router.post("/", response_model=SaleResponse, status_code=201)
 def create_sale(sale: SaleCreate, db: Session = Depends(get_db)):
     db_sale = SaleModel(
@@ -47,13 +47,12 @@ def create_sale(sale: SaleCreate, db: Session = Depends(get_db)):
     db.refresh(db_sale)
     return db_sale
 
-# get all sales 
 @router.get("/", response_model=List[SaleResponse])
 def get_sales(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     sales = db.query(SaleModel).offset(skip).limit(limit).all()
     return sales
 
-# get by id sale 
+
 @router.get("/{sale_id}", response_model=SaleResponse)
 def get_sale(sale_id: int, db: Session = Depends(get_db)):
     sale = db.query(SaleModel).filter(SaleModel.id == sale_id).first()
@@ -61,7 +60,7 @@ def get_sale(sale_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Venda não encontrada")
     return sale
 
-# Delete sale
+
 @router.delete("/{sale_id}")
 def delete_sale(sale_id: int, db: Session = Depends(get_db)):
     sale = db.query(SaleModel).filter(SaleModel.id == sale_id).first()
